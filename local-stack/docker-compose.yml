@@ -1,0 +1,50 @@
+networks:
+  local-bidding:
+    name: local-bidding
+
+services:
+  local-postgres:
+    image: postgres:alpine
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - local-bidding
+    ports:
+      - "15432:5432"
+    env_file: services/local-postgres/.env
+    volumes:
+      - "./services/local-postgres/init:/docker-entrypoint-initdb.d"
+
+  bidding-db-changelog-job:
+    image: bidding/bidding-db-changelog-job:latest
+    depends_on:
+      - local-postgres
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 128M
+    restart: "on-failure"
+    networks:
+      - local-bidding
+    env_file:
+      - services/bidding-db-changelog-job/.env
+
+  bidding-server:
+    image: bidding/bidding-server:latest
+    depends_on:
+      - local-postgres
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - local-bidding
+    ports:
+      - "8080:8080"
+    env_file:
+      - services/bidding-server/.env

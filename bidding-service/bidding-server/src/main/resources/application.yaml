@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: bidding-server
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  web:
+    resources:
+      add-mappings: false
+
+server:
+  servlet:
+    context-path: /bidding
